@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .calculator {
+            width: 400px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .display {
+            background: #2d3748;
+            color: white;
+            padding: 30px 20px;
+            text-align: right;
+            font-size: 32px;
+            min-height: 100px;
+            word-wrap: break-word;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5px;
+            background: #ccc;
+            padding: 0.5px;
+        }
+
+        button {
+            border: none;
+            padding: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        button:hover {
+            opacity: 0.8;
+            transform: scale(0.95);
+        }
+
+        button:active {
+            transform: scale(0.9);
+        }
+
+        .btn-orange {
+            background: #ed8936;
+            color: white;
+            font-weight: bold;
+        }
+
+        .btn-light {
+            background: #f7d4c4;
+            color: #2d3748;
+        }
+
+        .btn-operator {
+            background: #feebc8;
+            color: #2d3748;
+            font-size: 24px;
+        }
+
+        .btn-special {
+            background: #ed8936;
+            color: white;
+            font-size: 16px;
+        }
+
+        .result {
+            color: #48bb78;
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <!-- Row 1 -->
+            <button class="btn-special" onclick="insertText('sqrt(')">√x</button>
+            <button class="btn-special" onclick="insertText('3.14159')">π</button>
+            <button class="btn-special" onclick="insertText('2.71828')">e</button>
+            <button class="btn-special" onclick="clearDisplay()">C</button>
+            <button class="btn-special" onclick="backspace()">←</button>
+
+            <!-- Row 2 -->
+            <button class="btn-orange" onclick="insertFunction('cot')">cot()</button>
+            <button class="btn-light" onclick="insertText('^')">x<sup>y</sup></button>
+            <button class="btn-light" onclick="insertFunction('exp10')">10<sup>x</sup></button>
+            <button class="btn-light" onclick="insertFunction('abs')">|x|</button>
+            <button class="btn-operator" onclick="insertText('/')">÷</button>
+
+            <!-- Row 3 -->
+            <button class="btn-orange" onclick="insertFunction('tan')">tan()</button>
+            <button class="btn-light" onclick="insertText('7')">7</button>
+            <button class="btn-light" onclick="insertText('8')">8</button>
+            <button class="btn-light" onclick="insertText('9')">9</button>
+            <button class="btn-operator" onclick="insertText('*')">×</button>
+
+            <!-- Row 4 -->
+            <button class="btn-orange" onclick="insertFunction('cos')">cos()</button>
+            <button class="btn-light" onclick="insertText('4')">4</button>
+            <button class="btn-light" onclick="insertText('5')">5</button>
+            <button class="btn-light" onclick="insertText('6')">6</button>
+            <button class="btn-operator" onclick="insertText('-')">-</button>
+
+            <!-- Row 5 -->
+            <button class="btn-orange" onclick="insertFunction('sin')">sin()</button>
+            <button class="btn-light" onclick="insertText('1')">1</button>
+            <button class="btn-light" onclick="insertText('2')">2</button>
+            <button class="btn-light" onclick="insertText('3')">3</button>
+            <button class="btn-operator" onclick="insertText('+')">+</button>
+
+            <!-- Row 6 -->
+            <button class="btn-orange" onclick="insertFunction('log')">log</button>
+            <button class="btn-light" onclick="insertFunction('ln')">ln</button>
+            <button class="btn-light" onclick="insertText('0')">0</button>
+            <button class="btn-light" onclick="insertText('.')">.</button>
+            <button class="btn-operator" onclick="calculate()">=</button>
+        </div>
+    </div>
+
+    <script>
+        let display = document.getElementById('display');
+        let currentInput = '';
+
+        function insertText(text) {
+            if (currentInput === '0') {
+                currentInput = text;
+            } else {
+                currentInput += text;
+            }
+            display.textContent = currentInput;
+        }
+
+        function insertFunction(funcName) {
+            if (currentInput === '0') {
+                currentInput = funcName + '(';
+            } else {
+                currentInput += funcName + '(';
+            }
+            display.textContent = currentInput;
+        }
+
+        function clearDisplay() {
+            currentInput = '0';
+            display.textContent = currentInput;
+        }
+
+        function backspace() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = '0';
+            }
+            display.textContent = currentInput;
+        }
+
+        async function calculate() {
+            try {
+                let expression = currentInput;
+                
+                // Auto-close any unclosed parentheses
+                let openCount = (expression.match(/\(/g) || []).length;
+                let closeCount = (expression.match(/\)/g) || []).length;
+                let missingParens = '';
+                for (let i = 0; i < openCount - closeCount; i++) {
+                    expression += ')';
+                    missingParens += ')';
+                }
+                
+                // Update display to show the auto-closed parentheses
+                if (missingParens) {
+                    currentInput += missingParens;
+                    display.textContent = currentInput;
+                    expression = currentInput;
+                }
+                
+                // Send to backend
+                const response = await fetch('http://localhost:3000/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ expression: expression })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    display.textContent = 'Error: ' + data.error;
+                    setTimeout(() => {
+                        currentInput = '0';
+                        display.textContent = currentInput;
+                    }, 1500);
+                } else {
+                    display.innerHTML = currentInput + '<div class="result">= ' + data.result.toFixed(2) + '</div>';
+                    currentInput = data.result.toString();
+                }
+            } catch (error) {
+                display.textContent = 'Error: Server connection failed';
+                setTimeout(() => {
+                    currentInput = '0';
+                    display.textContent = currentInput;
+                }, 1500);
+            }
+        }
+
+        function toRadians(degrees) {
+            return degrees * Math.PI / 180;
+        }
+
+        function nthRoot(x, n) {
+            return Math.pow(x, 1/n);
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function(e) {
+            if (e.key >= '0' && e.key <= '9') insertText(e.key);
+            if (e.key === '.') insertText('.');
+            if (e.key === '+') insertText('+');
+            if (e.key === '-') insertText('-');
+            if (e.key === '*') insertText('*');
+            if (e.key === '/') insertText('/');
+            if (e.key === '(') insertText('(');
+            if (e.key === ')') insertText(')');
+            if (e.key === ',') insertText(',');
+            if (e.key === 'Enter') calculate();
+            if (e.key === 'Escape') clearDisplay();
+            if (e.key === 'Backspace') backspace();
+        });
+    </script>
+</body>
+</html>
